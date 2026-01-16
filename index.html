@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHADKA PHOTO BOOTH</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --accent: #ec4899;
+        }
+        body {
+            background-color: #09090b;
+            color: #f8fafc;
+            overflow-x: hidden;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #111;
+            border: 2px solid #27272a;
+            aspect-ratio: 4/3;
+        }
+        /* Ensure the video feed is visible and mirrored */
+        #output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); /* Mirror effect */
+            object-fit: cover;
+            display: block;
+            z-index: 10;
+        }
+        #input_video {
+            display: none; /* We only show the processed canvas */
+        }
+        .strip-preview {
+            background: white;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+        .strip-preview img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border: 1px solid #f1f5f9;
+        }
+        .flash {
+            animation: flashAnim 0.4s ease-out;
+        }
+        @keyframes flashAnim {
+            0% { background: white; opacity: 1; }
+            100% { background: transparent; opacity: 0; }
+        }
+        .countdown-text {
+            text-shadow: 0 0 30px rgba(0,0,0,1);
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-pink-400 to-purple-600 mb-3">
+            KHADKA BOOTH
+        </h1>
+        <p class="text-zinc-400 text-sm font-medium tracking-wide">
+            Strike 5 poses for your photo strip.
+        </p>
+    </header>
+
+    <main class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-6xl">
+        
+        <!-- Camera Section -->
+        <div class="flex-1 w-full text-center space-y-6">
+            <div class="video-container">
+                <video id="input_video" playsinline></video>
+                <canvas id="output_canvas"></canvas>
+                <div id="flash-overlay" class="absolute inset-0 z-20 pointer-events-none"></div>
+                
+                <div id="countdown" class="absolute inset-0 flex items-center justify-center text-8xl sm:text-9xl font-black text-white z-30 hidden countdown-text">
+                    3
+                </div>
+
+                <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-40">
+                    <div class="w-12 h-12 border-4 border-zinc-800 border-t-pink-500 rounded-full animate-spin mb-4"></div>
+                    <p class="text-[10px] uppercase tracking-widest text-zinc-500">Connecting Camera...</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-4">
+                <button id="start-session-btn" class="px-8 py-4 bg-white text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all uppercase tracking-widest shadow-xl">
+                    Start Session
+                </button>
+
+                <div id="session-status" class="hidden items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-zinc-300 uppercase">
+                        Pose <span id="pose-count" class="text-pink-400">1</span> of 5
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <aside id="preview-section" class="hidden w-full lg:w-72 flex flex-col items-center">
+            <div class="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 w-full">
+                <div id="strip-outer-container" class="bg-white p-3 shadow-2xl mx-auto w-fit">
+                     <div id="strip-container" class="strip-preview">
+                        <!-- Captured images will appear here -->
+                    </div>
+                    <div class="text-black font-serif italic text-center py-4 bg-white w-full border-t border-zinc-100 text-xs">
+                        khadka Photo Booth
+                    </div>
+                </div>
+                
+                <button id="download-btn" class="mt-6 w-full py-4 bg-pink-600 hover:bg-pink-500 text-white font-black rounded-xl transition-all uppercase tracking-widest text-xs shadow-lg shadow-pink-600/20">
+                    Download Strip
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="mt-12 text-zinc-700 text-[10px] font-bold tracking-widest uppercase">
+        &copy; 2026 KHADKA SHARAD
+    </footer>
+
+    <!-- Hidden canvas for generating the final high-res strip -->
+    <canvas id="final_strip_canvas" style="display:none;"></canvas>
+
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const loadingOverlay = document.getElementById('loading');
+        const countdownEl = document.getElementById('countdown');
+        const sessionStatus = document.getElementById('session-status');
+        const poseCountEl = document.getElementById('pose-count');
+        const stripContainer = document.getElementById('strip-container');
+        const previewSection = document.getElementById('preview-section');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const startBtn = document.getElementById('start-session-btn');
+
+        let isSessionActive = false;
+        let capturedImages = [];
+
+        // Initialize Canvas size to match display
+        function resizeCanvas() {
+            canvasElement.width = 640;
+            canvasElement.height = 480;
+        }
+        resizeCanvas();
+
+        // --- MEDIA PIPE RENDERING ---
+        function onResults(results) {
+            // Hide loading on first frame
+            if (loadingOverlay.style.display !== 'none') {
+                loadingOverlay.style.display = 'none';
+            }
+            
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            // Draw video frame to canvas
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // Draw hand tracking points
+            if (results.multiHandLandmarks) {
+                for (const landmarks of results.multiHandLandmarks) {
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#ec4899', lineWidth: 3});
+                    drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', lineWidth: 1, radius: 2});
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        
+        hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+
+        // --- PHOTO LOGIC ---
+        const takePhoto = () => {
+            flashOverlay.classList.add('flash');
+            setTimeout(() => flashOverlay.classList.remove('flash'), 400);
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 800;
+            tempCanvas.height = 600;
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Mirror the capture
+            ctx.translate(tempCanvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(videoElement, 0, 0, 800, 600);
+            
+            const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
+            capturedImages.push(dataUrl);
+
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            stripContainer.appendChild(img);
+        };
+
+        const startPhotoSession = async () => {
+            if (isSessionActive) return;
+            
+            isSessionActive = true;
+            capturedImages = [];
+            stripContainer.innerHTML = '';
+            previewSection.classList.add('hidden');
+            startBtn.classList.add('opacity-50', 'pointer-events-none');
+            sessionStatus.classList.remove('hidden', 'flex');
+            sessionStatus.classList.add('flex');
+            
+            for (let i = 1; i <= 5; i++) {
+                poseCountEl.innerText = i;
+                
+                // 3 Second Countdown
+                for (let c = 3; c > 0; c--) {
+                    countdownEl.innerText = c;
+                    countdownEl.classList.remove('hidden');
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                
+                countdownEl.classList.add('hidden');
+                takePhoto();
+                // Brief pause for the user to see the flash
+                await new Promise(r => setTimeout(r, 800));
+            }
+
+            sessionStatus.classList.add('hidden');
+            previewSection.classList.remove('hidden');
+            startBtn.classList.remove('opacity-50', 'pointer-events-none');
+            startBtn.innerText = "Try Again";
+            isSessionActive = false;
+
+            // Scroll to preview on mobile
+            if (window.innerWidth < 1024) {
+                previewSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        const generateFinalStrip = () => {
+            return new Promise((resolve) => {
+                const finalCanvas = document.getElementById('final_strip_canvas');
+                const fCtx = finalCanvas.getContext('2d');
+                const imgWidth = 600;
+                const imgHeight = 450;
+                const padding = 40;
+                const footerHeight = 140;
+                
+                finalCanvas.width = imgWidth + (padding * 2);
+                finalCanvas.height = (imgHeight * 5) + (padding * 6) + footerHeight;
+                
+                fCtx.fillStyle = 'white';
+                fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+                
+                let loadedCount = 0;
+                capturedImages.forEach((src, index) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        fCtx.drawImage(img, padding, padding + (index * (imgHeight + padding)), imgWidth, imgHeight);
+                        loadedCount++;
+                        if (loadedCount === 5) {
+                            fCtx.fillStyle = 'black';
+                            fCtx.font = 'italic 42px Georgia';
+                            fCtx.textAlign = 'center';
+                            fCtx.fillText('khadka Photo Booth', finalCanvas.width / 2, finalCanvas.height - 60);
+                            resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
+                        }
+                    };
+                    img.src = src;
+                });
+            });
+        };
+
+        // --- BUTTON HANDLERS ---
+        startBtn.onclick = startPhotoSession;
+
+        document.getElementById('download-btn').onclick = async () => {
+            const dataUrl = await generateFinalStrip();
+            const link = document.createElement('a');
+            link.download = `khadka-strip-${Date.now()}.jpg`;
+            link.href = dataUrl;
+            link.click();
+        };
+
+    </script>
+</body>
+</html>
