@@ -13,7 +13,7 @@
             --accent: #ec4899;
         }
         body {
-            background-color: #F5E9E7;
+            background-color:#F5E9E7 ;
             color: #f8fafc;
             overflow-x: hidden;
             font-family: ui-sans-serif, system-ui, sans-serif;
@@ -21,18 +21,18 @@
             touch-action: manipulation;
         }
         
-        /* Compact Square Camera Container */
+        /* Larger Square Camera Preview */
         .video-container {
             position: relative;
-            width: 100%;
-            max-width: 300px; /* Slightly smaller for better mobile fit */
+            width: 92vw; /* Use most of the screen width */
+            max-width: 450px; 
             margin: 0 auto;
-            border-radius: 1.25rem;
+            border-radius: 2rem;
             overflow: hidden;
             background: #000;
-            border: 1px solid #27272a;
-            aspect-ratio: 1/1;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+            border: 2px solid #27272a;
+            aspect-ratio: 1/1; /* Square Mirror */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
 
         #input_video {
@@ -54,128 +54,136 @@
             100% { background: transparent; opacity: 0; }
         }
 
-        /* Vertical Strip UI Preview */
+        /* Vertical Strip UI Preview - Now Square Photos */
         .strip-preview-vertical {
             background: white;
-            padding: 10px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            width: 150px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            margin: 0 auto;
+            gap: 12px;
+            width: 240px; /* Much larger preview */
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+            margin: 2rem auto;
         }
         
         .strip-preview-vertical img {
             width: 100%;
-            aspect-ratio: 16/10;
+            aspect-ratio: 1/1; /* Matches the Mirror size */
             object-fit: cover;
+            border-radius: 4px;
         }
 
         .strip-footer-text {
             color: #000;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 900;
             text-align: center;
-            letter-spacing: 1.5px;
-            padding-top: 2px;
+            letter-spacing: 3px;
+            padding: 10px 0 4px 0;
             text-transform: uppercase;
         }
 
         .countdown-text {
-            text-shadow: 0 0 30px rgba(0,0,0,0.8);
+            text-shadow: 0 0 50px rgba(0,0,0,0.9);
             font-variant-numeric: tabular-nums;
+            font-size: 10rem;
         }
 
-        /* Rotate Button - Always clickable unless actually capturing */
-        #rotate-camera-btn {
-            position: absolute;
-            bottom: 0.75rem;
-            right: 0.75rem;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.7rem;
-            border-radius: 50%;
-            z-index: 50;
+        /* Large Action Buttons */
+        .btn-primary {
+            width: 92vw;
+            max-width: 400px;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border-radius: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
             transition: all 0.2s ease;
         }
-        #rotate-camera-btn:active {
-            transform: scale(0.9) rotate(90deg);
+
+        #rotate-camera-btn {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            z-index: 50;
         }
 
-        /* Prevent scrolling when swiping on mobile */
-        .no-scroll {
-            overflow: hidden;
-            height: 100vh;
+        @media (min-width: 1024px) {
+            #rotate-camera-btn { display: none; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 overflow-y-auto">
+<body class="min-h-screen flex flex-col items-center p-4">
 
-    <header class="text-center mt-2 mb-4 w-full max-w-sm">
-        <h1 class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-zinc-400 to-zinc-600">
+    <header class="text-center mt-6 mb-8 w-full">
+        <h1 class="text-4xl font-black tracking-tighter text-white mb-1">
             KHADKA BOOTH
         </h1>
-        <p class="text-zinc-600 text-[7px] font-bold tracking-[0.4em] uppercase">
-           strike 4 different poses
+        <p class="text-zinc-500 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">
+            Strike 4 different poses
         </p>
+        <div class="h-1 w-12 bg-zinc-700 mx-auto rounded-full"></div>
     </header>
 
-    <main class="w-full max-w-sm mx-auto flex flex-col gap-6">
+    <main class="w-full flex flex-col items-center gap-8">
         
         <!-- Camera Section -->
         <div class="video-container">
             <video id="input_video" class="mirrored" playsinline muted></video>
             
             <button id="rotate-camera-btn" aria-label="Switch Camera">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
             </button>
 
             <div id="flash-overlay" class="absolute inset-0 z-20 pointer-events-none"></div>
-            <div id="countdown" class="absolute inset-0 flex items-center justify-center text-6xl font-black text-white z-30 hidden countdown-text">3</div>
+            <div id="countdown" class="absolute inset-0 flex items-center justify-center font-black text-white z-30 hidden countdown-text">3</div>
             
             <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 z-40 transition-opacity duration-500">
-                <div class="w-8 h-8 border-2 border-zinc-800 border-t-white rounded-full animate-spin mb-3"></div>
+                <div class="w-12 h-12 border-4 border-zinc-800 border-t-white rounded-full animate-spin"></div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="flex flex-col items-center gap-4">
-            <button id="start-session-btn" class="w-full max-w-[260px] py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-200 active:scale-95 transition-all uppercase tracking-[0.2em] shadow-xl text-[10px]">
-                Start Session
-            </button>
-
-            <div id="session-status" class="hidden items-center gap-3 px-5 py-2.5 bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-full">
-                <div class="flex gap-1.5">
-                    <span class="dot w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
-                    <span class="dot w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
-                    <span class="dot w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
-                    <span class="dot w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
-                </div>
-                <span class="text-[8px] font-black text-white uppercase tracking-widest">
-                    <span id="pose-count">1</span> / 4
-                </span>
+        <!-- Session Progress -->
+        <div id="session-status" class="hidden items-center gap-4 px-8 py-4 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
+            <div class="flex gap-3">
+                <span class="dot w-3 h-3 rounded-full bg-zinc-800"></span>
+                <span class="dot w-3 h-3 rounded-full bg-zinc-800"></span>
+                <span class="dot w-3 h-3 rounded-full bg-zinc-800"></span>
+                <span class="dot w-3 h-3 rounded-full bg-zinc-800"></span>
             </div>
+            <span class="text-xs font-black text-white uppercase tracking-widest">
+                Shot <span id="pose-count">1</span> / 4
+            </span>
         </div>
+
+        <!-- Primary Action -->
+        <button id="start-session-btn" class="btn-primary bg-white text-black shadow-white/10 shadow-2xl active:scale-95">
+            Start Session
+        </button>
 
         <!-- Result Section -->
-        <aside id="preview-section" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+        <aside id="preview-section" class="hidden animate-in fade-in slide-in-from-bottom-10 duration-700 w-full pb-20">
             <div class="flex flex-col items-center">
                 <div id="strip-container" class="strip-preview-vertical">
-                    <!-- Images will be injected here -->
+                    <!-- Square Images will be injected here -->
                 </div>
                 
-                <button id="download-btn" class="mt-6 w-full max-w-[200px] py-3.5 bg-zinc-100 hover:bg-white text-black font-black rounded-xl transition-all uppercase tracking-widest text-[9px] shadow-lg">
-                    Download Strip
+                <button id="download-btn" class="btn-primary mt-4 bg-zinc-100 text-black active:scale-95">
+                    Save Photo Strip
                 </button>
             </div>
         </aside>
     </main>
 
-    <footer class="mt-auto py-6 text-zinc-800 text-[7px] font-bold tracking-[0.4em] uppercase text-center">
-        &copy; KHADKA SHARAD
+    <footer class="mt-auto py-10 text-zinc-700 text-[10px] font-bold tracking-[0.5em] uppercase">
+        KHADKA SHARAD &copy; 2026
     </footer>
 
     <canvas id="final_strip_canvas" style="display:none;"></canvas>
@@ -198,10 +206,7 @@
         let cameraInstance = null;
 
         async function startCamera() {
-            if (cameraInstance) {
-                await cameraInstance.stop();
-            }
-            
+            if (cameraInstance) await cameraInstance.stop();
             loadingOverlay.style.display = 'flex';
             loadingOverlay.style.opacity = '1';
 
@@ -215,21 +220,14 @@
                         setTimeout(() => loadingOverlay.style.display = 'none', 500);
                     }
                 },
-                width: 1280,
-                height: 720,
+                width: 1080,
+                height: 1080, // Request square stream if possible
                 facingMode: facingMode
             });
-            
-            try {
-                await cameraInstance.start();
-            } catch (err) {
-                console.error("Camera failed:", err);
-            }
+            await cameraInstance.start();
         }
 
-        // Toggle camera even during session
-        rotateBtn.onclick = async (e) => {
-            e.stopPropagation();
+        rotateBtn.onclick = async () => {
             useFrontCamera = !useFrontCamera;
             await startCamera();
         };
@@ -239,40 +237,32 @@
             void flashOverlay.offsetWidth;
             flashOverlay.classList.add('flash-active');
             
+            // Photo size: 1:1 Square (Matches the Mirror)
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 1200;
-            tempCanvas.height = 750;
+            const size = 1080;
+            tempCanvas.width = size;
+            tempCanvas.height = size;
             const ctx = tempCanvas.getContext('2d');
             
             if (useFrontCamera) {
-                ctx.translate(tempCanvas.width, 0);
+                ctx.translate(size, 0);
                 ctx.scale(-1, 1);
             }
 
-            const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
-            const targetRatio = tempCanvas.width / tempCanvas.height;
-            
-            let drawW, drawH, drawX, drawY;
-            if (videoRatio > targetRatio) {
-                drawH = videoElement.videoHeight;
-                drawW = videoElement.videoHeight * targetRatio;
-                drawX = (videoElement.videoWidth - drawW) / 2;
-                drawY = 0;
-            } else {
-                drawW = videoElement.videoWidth;
-                drawH = videoElement.videoWidth / targetRatio;
-                drawX = 0;
-                drawY = (videoElement.videoHeight - drawH) / 2;
-            }
+            // Square Center Crop
+            const vW = videoElement.videoWidth;
+            const vH = videoElement.videoHeight;
+            const minDim = Math.min(vW, vH);
+            const sx = (vW - minDim) / 2;
+            const sy = (vH - minDim) / 2;
 
-            ctx.drawImage(videoElement, drawX, drawY, drawW, drawH, 0, 0, tempCanvas.width, tempCanvas.height);
+            ctx.drawImage(videoElement, sx, sy, minDim, minDim, 0, 0, size, size);
             
-            const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.9);
+            const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
             capturedImages.push(dataUrl);
 
             const img = document.createElement('img');
             img.src = dataUrl;
-            img.className = "rounded-sm";
             stripContainer.appendChild(img);
             
             if(index === 4) {
@@ -283,7 +273,7 @@
             }
             
             const dots = document.querySelectorAll('.dot');
-            dots[index-1].classList.replace('bg-zinc-800', 'bg-zinc-200');
+            dots[index-1].classList.replace('bg-zinc-800', 'bg-white');
         };
 
         const startPhotoSession = async () => {
@@ -293,8 +283,8 @@
             stripContainer.innerHTML = '';
             previewSection.classList.add('hidden');
             
-            document.querySelectorAll('.dot').forEach(d => d.className = "dot w-1.5 h-1.5 rounded-full bg-zinc-800");
-            startBtn.classList.add('opacity-0', 'pointer-events-none');
+            document.querySelectorAll('.dot').forEach(d => d.className = "dot w-3 h-3 rounded-full bg-zinc-800");
+            startBtn.classList.add('hidden');
             sessionStatus.classList.remove('hidden');
             sessionStatus.classList.add('flex');
             
@@ -307,19 +297,18 @@
                 }
                 countdownEl.classList.add('hidden');
                 takePhoto(i);
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 800));
             }
 
             sessionStatus.classList.add('hidden');
             previewSection.classList.remove('hidden');
-            startBtn.classList.remove('opacity-0', 'pointer-events-none');
-            startBtn.innerText = "New Session";
+            startBtn.classList.remove('hidden');
+            startBtn.innerText = "Take Another Strip";
             isSessionActive = false;
             
-            // Smooth scroll to the result on mobile
             setTimeout(() => {
                 previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+            }, 200);
         };
 
         const generateFinalStrip = () => {
@@ -327,14 +316,13 @@
                 const finalCanvas = document.getElementById('final_strip_canvas');
                 const fCtx = finalCanvas.getContext('2d');
                 
-                const imgW = 1000;
-                const imgH = 625; 
-                const gapY = 25;
-                const margin = 70;
-                const brandingH = 180;
+                const imgSize = 1000;
+                const gap = 30;
+                const margin = 80;
+                const brandingH = 200;
                 
-                finalCanvas.width = imgW + (margin * 2);
-                finalCanvas.height = (imgH * 4) + (gapY * 3) + (margin * 2) + brandingH;
+                finalCanvas.width = imgSize + (margin * 2);
+                finalCanvas.height = (imgSize * 4) + (gap * 3) + (margin * 2) + brandingH;
                 
                 fCtx.fillStyle = 'white';
                 fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
@@ -343,23 +331,23 @@
                 capturedImages.forEach((src, idx) => {
                     const img = new Image();
                     img.onload = () => {
-                        const y = margin + (idx * (imgH + gapY));
-                        fCtx.drawImage(img, margin, y, imgW, imgH);
+                        const y = margin + (idx * (imgSize + gap));
+                        fCtx.drawImage(img, margin, y, imgSize, imgSize);
                         
                         loaded++;
                         if (loaded === 4) {
                             fCtx.fillStyle = '#000';
                             fCtx.textAlign = 'center';
-                            fCtx.font = '900 48px sans-serif';
+                            fCtx.font = '900 60px sans-serif';
                             fCtx.letterSpacing = "15px";
-                            fCtx.fillText('KHADKA BOOTH', finalCanvas.width / 2, finalCanvas.height - 90);
+                            fCtx.fillText('KHADKA BOOTH', finalCanvas.width / 2, finalCanvas.height - 100);
                             
-                            fCtx.font = 'italic 22px Georgia, serif';
+                            fCtx.font = 'italic 28px Georgia, serif';
                             fCtx.letterSpacing = "0px";
-                            fCtx.fillStyle = '#888';
-                            fCtx.fillText('Studio Quality • 2026', finalCanvas.width / 2, finalCanvas.height - 50);
+                            fCtx.fillStyle = '#666';
+                            fCtx.fillText('Professional Quality • 2026', finalCanvas.width / 2, finalCanvas.height - 55);
                             
-                            resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
+                            resolve(finalCanvas.toDataURL('image/jpeg', 0.98));
                         }
                     };
                     img.src = src;
@@ -372,13 +360,13 @@
 
         document.getElementById('download-btn').onclick = async () => {
             const btn = document.getElementById('download-btn');
-            btn.innerText = "Processing...";
+            btn.innerText = "Preparing High-Res...";
             const dataUrl = await generateFinalStrip();
             const link = document.createElement('a');
-            link.download = `khadka-booth-${Date.now()}.jpg`;
+            link.download = `khadka-square-strip-${Date.now()}.jpg`;
             link.href = dataUrl;
             link.click();
-            btn.innerText = "Download Strip";
+            btn.innerText = "Save Photo Strip";
         };
     </script>
 </body>
