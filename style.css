@@ -1,0 +1,147 @@
+
+        :root {
+            --accent: #ec4899;
+            --brand-bg: #F5E9E7;
+            --brand-dark: #18181b;
+        }
+        body {
+            background-color: var(--brand-bg);
+            color: var(--brand-dark);
+            overflow-x: hidden;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Larger Square Camera Preview */
+        .video-container {
+            position: relative;
+            width: 92vw; /* Use most of the screen width */
+            max-width: 450px; 
+            margin: 0 auto;
+            border-radius: 2rem;
+            overflow: hidden;
+            background: #000;
+            border: 2px solid rgba(24, 24, 27, 0.1);
+            aspect-ratio: 1/1; /* Square Mirror */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        #input_video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mirrored {
+            transform: scaleX(-1);
+        }
+
+        /* Flash Animation */
+        .flash-active {
+            animation: flashAnim 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+        @keyframes flashAnim {
+            0% { background: white; opacity: 1; }
+            100% { background: transparent; opacity: 0; }
+        }
+
+        /* Vertical Strip UI Preview - Now Square Photos */
+        .strip-preview-vertical {
+            background: white;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 240px; /* Much larger preview */
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.15);
+            margin: 2rem auto;
+        }
+        
+        .strip-preview-vertical img {
+            width: 100%;
+            aspect-ratio: 1/1; /* Matches the Mirror size */
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .strip-footer-text {
+            color: #000;
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 3px;
+            padding: 10px 0 4px 0;
+            text-transform: uppercase;
+        }
+
+        .countdown-text {
+            text-shadow: 0 0 50px rgba(0,0,0,0.9);
+            font-variant-numeric: tabular-nums;
+            font-size: 10rem;
+        }
+
+        /* Large Action Buttons */
+        .btn-primary {
+            width: 92vw;
+            max-width: 400px;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border-radius: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Start Button */
+        #start-session-btn {
+            background-color: var(--brand-dark);
+            color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        #start-session-btn:hover {
+            background-color: #27272a;
+            transform: translateY(-2px);
+        }
+
+        /* Dark Save Button */
+        #download-btn {
+            background-color: var(--brand-dark);
+            color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        #download-btn:hover {
+            background-color: #3f3f46;
+            transform: translateY(-2px);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        #rotate-camera-btn {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            z-index: 50;
+        }
+
+        /* Footer Link Styles */
+        .footer-link {
+            color: var(--brand-dark);
+            transition: color 0.2s ease, opacity 0.2s ease;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+        .footer-link:hover {
+            opacity: 0.6;
+            text-decoration: underline;
+        }
+
+        @media (min-width: 1024px) {
+            #rotate-camera-btn { display: none; }
+        }
