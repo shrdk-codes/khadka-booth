@@ -31,6 +31,7 @@ Camera Handling: MediaPipe Camera Utilities for optimized frame-rate processing.
 Graphics: HTML5 Canvas API for real-time video manipulation and final image compositing.
 
 # How to Use
+Go to : https://khadka-booth.vercel.app/
 
 Permissions: Grant the browser access to your camera when prompted.
 
