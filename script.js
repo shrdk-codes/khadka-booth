@@ -1,4 +1,4 @@
- <script>
+
         const videoElement = document.getElementById('input_video');
         const loadingOverlay = document.getElementById('loading');
         const countdownEl = document.getElementById('countdown');
@@ -176,4 +176,4 @@
             link.click();
             btn.innerText = "Save Photo Strip";
         };
-    </script>
+ 
