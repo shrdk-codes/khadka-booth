@@ -174,6 +174,6 @@
             link.download = `khadka-square-strip-${Date.now()}.jpg`;
             link.href = dataUrl;
             link.click();
-            btn.innerText = "Save Photo Strip";
+            btn.innerText = "Save Strip";
         };
  
